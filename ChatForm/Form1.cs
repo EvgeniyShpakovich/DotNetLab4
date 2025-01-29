@@ -24,28 +24,48 @@ namespace ChatForm
         {
             try
             {
-                _factory = new DuplexChannelFactory<IChatService>(this, new NetTcpBinding(),
-                    new EndpointAddress("net.tcp://localhost:8000/ChatService"));
-                _chatService = _factory.CreateChannel();
-
-                var connected = await _chatService.ConnectAsync(_username);
+                await InitializeChatServiceAsync();
+                var connected = await ConnectToChatServiceAsync();
 
                 if (connected)
                 {
-                    ChatBox.AppendText("Connected to chat." + Environment.NewLine);
-                    ConnectButton.Enabled = false;
-                    UsernameBox.Enabled = false;
+                    UpdateUIOnSuccess();
                 }
                 else
                 {
-                    ChatBox.AppendText("Failed to connect." + Environment.NewLine);
+                    UpdateUIOnFailure();
                 }
             }
             catch
             {
-                ChatBox.AppendText("Failed to connect." + Environment.NewLine);
+                UpdateUIOnFailure();
             }
         }
+
+        private async Task InitializeChatServiceAsync()
+        {
+            _factory = new DuplexChannelFactory<IChatService>(this, new NetTcpBinding(),
+                new EndpointAddress("net.tcp://localhost:8000/ChatService"));
+            _chatService = _factory.CreateChannel();
+        }
+
+        private async Task<bool> ConnectToChatServiceAsync()
+        {
+            return await _chatService.ConnectAsync(_username);
+        }
+
+        private void UpdateUIOnSuccess()
+        {
+            ChatBox.AppendText("Connected to chat." + Environment.NewLine);
+            ConnectButton.Enabled = false;
+            UsernameBox.Enabled = false;
+        }
+
+        private void UpdateUIOnFailure()
+        {
+            ChatBox.AppendText("Failed to connect." + Environment.NewLine);
+        }
+
 
         public void ReceiveMessage(string message)
         {
