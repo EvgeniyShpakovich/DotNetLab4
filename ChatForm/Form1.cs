@@ -100,15 +100,17 @@ namespace ChatForm
             await ConnectToServerAsync();
         }
 
+        private const string TimeFormat = "HH:mm";
+
         private async void SendButton_Click(object sender, EventArgs e)
         {
             var message = MessageBox.Text;
-            var currentTime = DateTime.Now.ToString("HH:mm");
+            var currentTime = DateTime.Now.ToString(TimeFormat);
 
             if (!string.IsNullOrEmpty(_selectedUser) && _selectedUser != _username)
             {
                 ChatBox.AppendText($"[{currentTime}] ");
-               await _chatService.SendPrivateMessageAsync(message,  _selectedUser, _username);
+                await _chatService.SendPrivateMessageAsync(message, _selectedUser, _username);
                 ChatBox.AppendText($"[You -> {_selectedUser}]: {message}" + Environment.NewLine);
             }
             else
