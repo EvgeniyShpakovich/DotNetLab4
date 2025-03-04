@@ -101,24 +101,40 @@ namespace ChatForm
 
         private const string TimeFormat = "HH:mm";
 
+        private string FormatMessage(string message, string sender, string recipient)
+        {
+            var currentTime = DateTime.Now.ToString(TimeFormat);
+            return !string.IsNullOrEmpty(recipient) && recipient != sender
+                ? $"[{currentTime}] [You -> {recipient}]: {message}"
+                : $"[{currentTime}] {message}";
+        }
+
         private async void SendButton_Click(object sender, EventArgs e)
         {
             var message = MessageBox.Text;
-            var currentTime = DateTime.Now.ToString(TimeFormat);
+            if (string.IsNullOrEmpty(message)) return;
 
-            if (!string.IsNullOrEmpty(_selectedUser) && _selectedUser != _username)
+            string formattedMessage = FormatMessage(message, _username, _selectedUser);
+            ChatBox.AppendText(formattedMessage + Environment.NewLine);
+
+            try
             {
-                ChatBox.AppendText($"[{currentTime}] ");
-                await _chatService.SendPrivateMessageAsync(message, _selectedUser, _username);
-                ChatBox.AppendText($"[You -> {_selectedUser}]: {message}" + Environment.NewLine);
+                if (!string.IsNullOrEmpty(_selectedUser) && _selectedUser != _username)
+                {
+                    await _chatService.SendPrivateMessageAsync(message, _selectedUser, _username);
+                }
+                else
+                {
+                    await _chatService.SendMessageToGroupAsync(message, _username);
+                }
             }
-            else
+            catch (Exception ex)
             {
-                await _chatService.SendMessageToGroupAsync(message, _username);
+                ChatBox.AppendText($"Error sending message: {ex.Message}" + Environment.NewLine);
             }
+
             ChatBox.SelectionStart = ChatBox.Text.Length;
             ChatBox.ScrollToCaret();
-
             MessageBox.Clear();
         }
 
