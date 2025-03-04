@@ -56,11 +56,13 @@ public class ChatService : IChatService
         await SendMessageToAllUsersAsync(formattedMessage);
     }
 
-    private string FormatMessage(string message, string sender)
+    private string FormatMessage(string message, string sender, bool isPrivate = false)
     {
         var currentTime = DateTime.Now.ToString("HH:mm");
-        return $"[{currentTime}] {sender}: {message}";
+        var prefix = isPrivate ? "[Private] " : "";
+        return $"[{currentTime}] {prefix}{sender}: {message}";
     }
+
 
     private async Task SendMessageToAllUsersAsync(string message)
     {
@@ -74,7 +76,7 @@ public class ChatService : IChatService
     {
         if (_users.TryGetValue(recipient, out var callback))
         {
-            var formattedMessage = FormatPrivateMessage(message, sender);
+            var formattedMessage = FormatMessage(message, sender);
             callback.ReceiveMessage(formattedMessage);
         }
         else
@@ -83,11 +85,6 @@ public class ChatService : IChatService
         }
     }
 
-    private string FormatPrivateMessage(string message, string sender)
-    {
-        var currentTime = DateTime.Now.ToString("HH:mm");
-        return $"[{currentTime}] [Private] {sender}: {message}";
-    }
 
     private async Task NotifySenderUserNotFound(string sender, string recipient)
     {
