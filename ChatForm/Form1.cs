@@ -72,28 +72,27 @@ namespace ChatForm
             ChatBox.Invoke(new MethodInvoker(() => ChatBox.Text += message + Environment.NewLine));
         }
 
+        private void UpdateUserListUI(List<string> users)
+        {
+            OnlineUsers.Items.Clear();
+            foreach (var user in users)
+            {
+                OnlineUsers.Items.Add(user);
+            }
+        }
+
         public void UpdateUserList(List<string> users)
         {
             if (OnlineUsers.InvokeRequired)
             {
-                OnlineUsers.Invoke(new Action(() =>
-                {
-                    OnlineUsers.Items.Clear();
-                    foreach (var user in users)
-                    {
-                        OnlineUsers.Items.Add(user);
-                    }
-                }));
+                OnlineUsers.Invoke(new Action(() => UpdateUserListUI(users)));
             }
             else
             {
-                OnlineUsers.Items.Clear();
-                foreach (var user in users)
-                {
-                    OnlineUsers.Items.Add(user);
-                }
+                UpdateUserListUI(users);
             }
         }
+
         private async void ConnectButton_Click(object sender, EventArgs e)
         {
             _username = UsernameBox.Text;
